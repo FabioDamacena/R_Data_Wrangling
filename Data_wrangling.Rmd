@@ -1,0 +1,63 @@
+---
+title: "Data_Wrangling"
+author: "Fabio Damacena"
+date: "04/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Dataset Champions League
+
+Vamos exercitar manipulação de dados com R. Para tanto, utilizaremos o pacote 
+dplyr, que está contido no tidyverse.
+dplyr: contém muitas funções comuns na manipulação de dados.
+
+Para o exercício, utilaremos o dataset com os resultados dos jogos da temporada 
+20-21 da UEFA Champions League.
+Fonte: https://www.kaggle.com/datasets, enviado por Marco Carujo
+
+# importando arquivos
+
+```{r}
+library(tidyverse)
+jogos <- read.csv("(5.2) Champions League 2020-2021.csv")
+```
+
+## Visualizando os dados carregados
+
+# Mostra a base de dados completa em uma nova aba
+```{r}
+View(jogos) # não usar quando o dataset for muito grande
+```
+# Mostra as 5 primeiras observações da base de dados
+```{r}
+head(jogos, n=5)
+```
+# Mostra a estrutura da base de dados
+```{r}
+str(jogos)
+```
+
+# Glimpse para ver a estrutura da base de dados
+```{r}
+glimpse(jogos)
+```
+
+# Apresenta uma variável da base de dados no console
+```{r}
+print(jogos$stage)
+```
+
+# As dimensões do dataset: linhas e colunas, respectivamente
+```{r}
+dim(jogos)
+```
+
+# Para ver os nomes das variáveis
+```{r}
+names(jogos)
+```
+
