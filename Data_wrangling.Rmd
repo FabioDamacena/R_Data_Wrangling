@@ -61,3 +61,37 @@ dim(jogos)
 names(jogos)
 ```
 
+## Função rename
+
+
+## Função recode
+
+
+## Função mutate
+
+
+## Função transmute
+
+
+## Função select
+
+
+## Função relocate
+
+
+## Função summarise
+
+
+## Função group_by
+
+
+## Função filter
+
+
+## Função slice
+
+
+## Funções join
+
+
+## Funções bind
