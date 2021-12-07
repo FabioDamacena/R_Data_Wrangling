@@ -62,12 +62,21 @@ names(jogos)
 ```
 
 ## Função rename
+Serve para alterar o nome das variáveis
+```{r}
+jogos %>% rename(fase = stage,
+                 data = date,
+                 mandante = team_name_home,
+                 visitante = team_name_away)
+```
+
+
+## Função mutate
+
 
 
 ## Função recode
 
-
-## Função mutate
 
 
 ## Função transmute
