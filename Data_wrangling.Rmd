@@ -64,7 +64,7 @@ names(jogos)
 ## Função rename
 Serve para alterar o nome das variáveis
 ```{r}
-jogos %>% rename(fase = stage,
+jogos = jogos %>% rename(fase = stage,
                  data = date,
                  mandante = team_name_home,
                  visitante = team_name_away)
@@ -73,34 +73,168 @@ jogos %>% rename(fase = stage,
 
 ## Função mutate
 
+Função "mutate": apresenta duas utilidades principais
+1. Inclui variáveis no dataset, mantendo as existentes
+2. Transforma o conteúdo das variáveis
 
+Uma variável que não consta na lista é o time vencedor do jogo.
+Vamos criar usando o mutate e a função case_when para definir a fórmula.
+O case_when funciona como um "se -> então"
+```{r}
+jogos <- jogos %>% mutate(time_vencedor = case_when(
+  c(jogos$team_home_score-jogos$team_away_score)==0 ~ "empate",
+  c(jogos$team_home_score-jogos$team_away_score)>0 ~ "mandante",
+  c(jogos$team_home_score-jogos$team_away_score)<0 ~ "visitante")) %>% 
+  relocate(time_vencedor, .after = team_away_score)
+```
+
+Vamos gerar um gráfico para visualizar melhor a informação resultante
+  
+```{r}
+ggplot(jogos) + 
+  geom_bar(aes(x = time_vencedor)) + 
+  labs(x = "Vencedor",
+       y = "Contagem") + 
+  theme_light()
+```
+
+Vamos analisar o gráfico de acordo com as fases da competição:
+```{r}
+ggplot(jogos) + 
+  geom_bar(aes(x = interaction(time_vencedor, fase), fill=factor(fase))) + 
+  labs(x = "Vencedor por Fase",
+       y = "Contagem") + 
+  scale_fill_brewer(palette=18)
+```
+
+Uma informação interessante seria identificar os jogadores que fizeram os gols
+Esta informação está na variável "events_list" que é uma string mais complexa
+Precisamos retirar a informação específica, então vamos procurar um padrão
+A informação que queremos está sempre após -- 'Goal', 'action_player_1': ' --
+
+```{r}
+jogos[1, 23]
+```
+
+
+```{r}
+extrai_gol <- str_extract_all(jogos$events_list, 
+                     "'Goal', 'action_player_1': '\\w*(.*?)\\w*\\'",
+                     simplify = TRUE)
+```
+
+Acima, utilizamos regex (regular expression), úteis para trabalhar em strings
+O str_extract_all pede para extrair em todas as ocorrências do padrão
+
+Pedimos para extrair qualquer palavra (\w) contida entre as extremidades:
+Extremidade 1: 'Goal', 'action_player_1': '
+Extremidade 2: ' (só o apóstrofo)
+A seguir, apenas faremos uma limpeza no texto
+
+```{r}
+gol <- gsub("'Goal', 'action_player_1': ", "", extrai_gol)
+gol_jogador <- gsub("'", "", gol)
+```
+
+```{r}
+extrai_gol
+```
+```{r}
+gol
+```
+```{r}
+gol_jogador
+```
+
+
+O mesmo critério vamos usar para extrair os gols de pênalti
+```{r}
+extrai_penalti <- str_extract_all(jogos$events_list,
+              "'event_type': 'Penalty', 'action_player_1': '\\w*(.*?)\\w*\\'",
+              simplify = TRUE)
+extrai_penalti <- gsub("'event_type': 'Penalty', 'action_player_1': ", "", extrai_penalti)
+extrai_penalti <- gsub("'", "", extrai_penalti)
+```
+
+Por fim, podemos pedir uma tabela de frequências dos gols
+
+```{r}
+sort(table(cbind(gol_jogador, extrai_penalti)), decreasing = T)
+```
 
 ## Função recode
+Em conjunto com o mutate, também pode ser utilizada a função "recode". 
+Serve para, por exemplo, trocar um texto por outro texto e criar uma variável
 
+```{r}
+jogos = mutate(jogos,
+                 exemplo_recode = recode(pens,
+                                   "False" = "falso",
+                                   "True" = "verdadeiro"))
+```
 
 
 ## Função transmute
+Inclui variáveis no dataset, excluindo as existentes. Depois de informar o dataset, informe as variáveis mantidas e adicionadas:
 
+
+```{r}
+jogos_exclui = transmute(jogos,
+                   fase, data)
+```
 
 ## Função select
+Tem a finalidade principal de extrair variáveis selecionadas. 
+Também pode ser utilizada para reposicionar as variáveis no dataset
 
+```{r}
+jogos = select(jogos,
+                fase:lineup_away)
+```
 
-## Função relocate
+```{r}
+jogos = jogos %>% select(fase, data, time_vencedor, everything())
+```
 
 
 ## Função summarise
+função que resume o dataset, podendo criar outros
 
+```{r}
+estatisticas_mandante = summarise(jogos,
+                         mandante = n(),
+                         media_gols = mean(team_home_score),
+                         maximo = max(team_home_score))
+```
 
 ## Função group_by
+Pode ser utilizada para criar informações mais específicas sobre o dataset. Para isto, o "summarise" é utilizado em conjunto com a função "group by". 
+Serve para agrupar as informações do dataset por determinado critério.
+
+```{r}
+times = group_by(jogos, mandante)
+```
+
+```{r}
+estatisticas_times = times %>% summarise(media = mean(team_home_score),
+                                         maximo = max(team_home_score))
+```
 
 
 ## Função filter
+Filter: tem o objetivo de gerar subconjuntos do dataset. São especificados os critérios e as linhas que os atenderem serão filtradas. Os principais operadores lógicos são:
+==: igual
+!=: diferente
+"> e <: maior e menor (podem conter o igual >= e <=)
+&: indica "E"
+|: indica "OU""
 
+```{r}
+mandante_fez_gol = filter(jogos, team_home_score > 0)
+```
 
 ## Função slice
-
-
-## Funções join
-
-
-## Funções bind
+A função "filter" seleciona linhas com base em critérios lógicos. A função "slice" pode ser utilizada para a seleção de linhas usando posições.
+```{r}
+slice = jogos %>% slice(1:10)
+```
